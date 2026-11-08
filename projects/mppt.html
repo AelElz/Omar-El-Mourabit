@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Analog MPPT in PSpice — Omar El Mourabit</title>
+  <meta name="description" content="Système photovoltaïque avec commande MPPT automatique sous OrCAD PSpice: an analog maximum power point tracker built from comparators, RC cells, a 555 oscillator and a flip-flop. Case study by Omar El Mourabit.">
+  <meta name="theme-color" content="#0A2440">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.css">
+  <link rel="stylesheet" href="../assets/css/main.css?v=6">
+  <link rel="stylesheet" href="../assets/css/project.css?v=6">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body class="p-page" data-page="mppt" data-root="../">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="union" viewBox="0 0 159 158">
+      <path id="union-path" fill="currentColor" d="M90.4023 0.0107422C90.5815 0.00821822 90.7602 0.00746915 90.9385 0.00488281C91.3222 16.9644 90.6103 34.4606 91.0908 51.4082C98.7402 43.0194 107.931 34.6354 115.848 26.4375C119.29 22.8728 124.187 18.5642 127.302 14.8799C128.359 16.5592 141.511 29.643 143.479 31.2715C141.141 33.3945 138.558 36.1288 136.282 38.417L122.388 52.4043L112.807 61.8789C111.366 63.2967 108.399 66.1222 107.236 67.5645C119.023 67.4462 130.81 67.4213 142.597 67.4893C147.382 67.4898 153.72 67.6871 158.378 67.4111L158.411 90.5488C154.022 90.1228 144.422 90.4071 139.551 90.4131C128.76 90.3481 117.969 90.3826 107.179 90.5186C116.356 99.3595 125.35 108.867 134.499 117.781C137.396 120.603 140.613 124.193 143.46 126.859C140.516 129.393 137.024 133.138 134.196 135.91C132.474 137.598 128.741 141.208 127.296 143L110.801 126.561C104.392 120.083 97.5999 113.048 91.0176 106.77L91.0254 157.96C90.7298 157.96 90.4336 157.961 90.1377 157.962V157.964C86.5143 158.002 82.8608 158.003 79.2051 157.994C75.5497 158.003 71.8965 158.002 68.2734 157.964L68.2725 157.962C67.9769 157.961 67.681 157.96 67.3857 157.96L67.3936 106.77C60.8112 113.048 54.0187 120.083 47.6104 126.561L31.1152 143C29.6701 141.208 25.9371 137.598 24.2148 135.91C21.3868 133.138 17.8954 129.393 14.9512 126.859C17.798 124.193 21.0154 120.603 23.9121 117.781C33.0609 108.867 42.0551 99.3595 51.2324 90.5186C40.4423 90.3826 29.651 90.3481 18.8604 90.4131C13.9892 90.4071 4.38918 90.1228 0 90.5488L0.0332031 67.4111C4.69141 67.6871 11.0288 67.4898 15.8145 67.4893C27.6014 67.4213 39.3885 67.4462 51.1748 67.5645C50.0124 66.1222 47.0447 63.2967 45.6045 61.8789L36.0234 52.4043L22.1289 38.417C19.8533 36.1288 17.2705 33.3945 14.9316 31.2715C16.9 29.643 30.0526 16.5592 31.1094 14.8799C34.2243 18.5642 39.1213 22.8728 42.5635 26.4375C50.4801 34.6354 59.6709 43.0194 67.3203 51.4082C67.8008 34.4606 67.089 16.9644 67.4727 0.00488281C67.6506 0.00746445 67.829 0.00822269 68.0078 0.0107422V0C68.5618 0.0126391 69.1204 0.0210645 69.6826 0.03125C72.9298 0.0724011 76.2903 0.103649 79.6406 0.105469C82.7014 0.0996992 85.7617 0.0688328 88.7275 0.03125C89.29 0.02106 89.849 0.0126464 90.4033 0L90.4023 0.0107422Z"/>
+    </symbol>
+  </defs>
+</svg>
+
+<a class="skip" href="#problem">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../index.html" data-transition aria-label="Omar El Mourabit, home">
+    <svg class="brand__mark" viewBox="0 0 159 158" aria-hidden="true"><use href="#union"/></svg>
+    <span class="brand__name">Omar El Mourabit</span>
+  </a>
+</header>
+<a class="p-back" href="../index.html#projects" data-transition><span aria-hidden="true">←</span> <b>All projects</b></a>
+
+<main>
+  <!-- HERO -->
+  <section class="p-hero p-hero--navy" aria-labelledby="p-title">
+    <div class="p-hero__top" aria-hidden="true"><span>Case study <b>01</b></span><span>Sep — Nov 2025</span><span>OrCAD PSpice</span></div>
+    <div class="p-hero__word" aria-hidden="true">MPPT</div>
+    <svg class="p-hero__art mppt-hero__svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <g class="mppt-hero__grid"></g>
+      <path class="mppt-hero__area" d=""/>
+      <path class="mppt-hero__curve" d=""/>
+      <g class="mppt-hero__mpp">
+        <circle class="mppt-hero__glow" r="46" cx="0" cy="0"/>
+        <path class="mppt-hero__tracker" d=""/>
+      </g>
+      <text class="mppt-hero__label" x="0" y="0">Maximum power point</text>
+    </svg>
+
+    <div class="wrap p-hero__content">
+      <div>
+        <p class="p-hero__kicker">Featured project · Sep — Nov 2025</p>
+        <h1 id="p-title" data-split>Système photovoltaïque avec commande MPPT automatique</h1>
+        <p class="p-hero__sub" data-reveal>An analog maximum‑power‑point tracker for a solar panel, built from comparators, RC cells, a triangle oscillator and a flip‑flop, and simulated in OrCAD PSpice. No microcontroller, no code.</p>
+      </div>
+      <dl class="p-facts" data-stagger>
+        <div><dt>Period</dt><dd>Sep — Nov 2025</dd></div>
+        <div><dt>Software</dt><dd>OrCAD PSpice</dd></div>
+        <div><dt>Power stage</dt><dd>Boost into 50 Ω</dd></div>
+        <div><dt>Result</dt><dd>≈73 W held at MPP</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- 01 THE PROBLEM + live explorer -->
+  <section class="p-sec p-sec--paper" id="problem" aria-labelledby="problem-title">
+    <div class="wrap">
+      <div class="sec-head"><span>01</span><span>The problem</span></div>
+      <div class="p-head">
+        <h2 class="h2" id="problem-title" data-split>A panel gives its best at one point only.</h2>
+        <p class="lede" data-reveal>Every point on a panel’s I–V curve gives a different power. The maximum moves with sunlight and temperature, so a fixed load leaves energy on the table. A tracker keeps walking the operating point back to the peak. Try it: change the sun, watch it hunt.</p>
+      </div>
+
+      <div class="pv" data-ui>
+        <div class="chart-card pv__chart">
+          <p class="pv__legend"><span><i style="background:#FFD24A"></i>Power P(V)</span><span><i style="background:rgba(247,249,252,.4)"></i>Current I(V)</span><span><i style="background:#8cc3ea"></i>Perturb &amp; observe tracker</span></p>
+          <svg class="chart-svg" id="pv-svg" viewBox="0 0 720 440" role="img" aria-label="Power–voltage and current–voltage curves of a solar module, with a tracker point hunting the maximum">
+            <g class="ax" id="pv-ax"></g>
+            <path class="tr tr--faint tr--thin" id="pv-i" d=""/>
+            <path class="tr tr--sun" id="pv-p" d=""/>
+            <g id="pv-trail"></g>
+            <line id="pv-mpp-v" class="an__cursor" x1="0" x2="0" y1="0" y2="0"/>
+            <circle id="pv-mpp" r="7" class="an__mpp"/>
+            <circle id="pv-dot" r="8" fill="#8cc3ea" stroke="#0A2440" stroke-width="3"/>
+          </svg>
+        </div>
+        <div class="pv__panel">
+          <div class="pv__ctl">
+            <label for="pv-g">Irradiance <output id="pv-g-out">1000 W/m²</output></label>
+            <input class="range" id="pv-g" type="range" min="150" max="1000" step="10" value="1000">
+            <p>Clouds pass: drag it down and the peak drops and slides left.</p>
+          </div>
+          <div class="pv__ctl">
+            <label for="pv-t">Cell temperature <output id="pv-t-out">25 °C</output></label>
+            <input class="range" id="pv-t" type="range" min="0" max="75" step="1" value="25">
+            <p>Hot cells lose voltage, so the peak moves to a lower V.</p>
+          </div>
+          <div class="pv__btns" role="group" aria-label="Tracker">
+            <button class="seg" type="button" id="pv-run" aria-pressed="true">Tracker on</button>
+            <button class="seg" type="button" id="pv-cloud">Pass a cloud</button>
+          </div>
+          <dl class="pv__read">
+            <div><dt>Available maximum</dt><dd><span id="pv-pmax">0</span><small>W</small></dd></div>
+            <div><dt>At voltage</dt><dd><span id="pv-vmpp">0</span><small>V</small></dd></div>
+            <div class="is-key"><dt>Tracker delivers</dt><dd><span id="pv-ptr">0</span><small>W</small></dd></div>
+            <div class="is-key"><dt>Tracking efficiency</dt><dd><span id="pv-eff">0</span><small>%</small></dd></div>
+          </dl>
+        </div>
+      </div>
+      <p class="pv__note">Single‑diode model of a 36‑cell module, for illustration. The tracker uses the same rule as the circuit below: step the operating point, keep the direction while power rises, reverse it when power falls. The results further down are from my PSpice run.</p>
+    </div>
+  </section>
+
+  <!-- 02 THE LOOP: horizontal -->
+  <section class="p-sec p-sec--navy loop" id="loop" aria-labelledby="loop-title">
+    <div class="loop__pin">
+      <div class="wrap loop__head">
+        <div class="sec-head"><span>02</span><span>The loop</span></div>
+        <div class="p-head" style="margin-bottom:0">
+          <h2 class="h2" id="loop-title" data-split>Seven analog blocks, one decision: keep going or turn back.</h2>
+          <p class="lede" data-reveal>Perturb and observe, done in hardware. Each block below is a part of the PSpice schematic, in the order the signal travels through it.</p>
+        </div>
+      </div>
+      <ol class="loop__track">
+        <li class="stage">
+          <div class="stage__scope"><svg viewBox="0 0 360 180" data-scope="sense" aria-hidden="true"></svg></div>
+          <div class="stage__body">
+            <h3 class="stage__name"><small>Stage 1</small>Sense</h3>
+            <p class="stage__text">A 22 kΩ / 1 kΩ divider reads the panel voltage. A 120 mΩ shunt reads its current, and a µA741 lifts that small voltage to a usable level.</p>
+            <ul class="chips"><li>R11 · R12</li><li>R13 120 mΩ</li><li>µA741</li></ul>
+          </div>
+        </li>
+        <li class="stage">
+          <div class="stage__scope"><svg viewBox="0 0 360 180" data-scope="multiply" aria-hidden="true"></svg></div>
+          <div class="stage__body">
+            <h3 class="stage__name"><small>Stage 2</small>Multiply</h3>
+            <p class="stage__text">An analog multiplier turns V × I into one voltage that is proportional to the panel’s power. Everything after this point only looks at power.</p>
+            <ul class="chips"><li>Multiplier</li><li>P = V·I</li></ul>
+          </div>
+        </li>
+        <li class="stage">
+          <div class="stage__scope"><svg viewBox="0 0 360 180" data-scope="compare" aria-hidden="true"></svg></div>
+          <div class="stage__body">
+            <h3 class="stage__name"><small>Stage 3</small>Compare</h3>
+            <p class="stage__text">An LM319 compares power now with power a moment ago, held back by an RC cell. Its answer is one bit: did the last step help?</p>
+            <ul class="chips"><li>LM319</li><li>RC delay</li><li>dP/dt sign</li></ul>
+          </div>
+        </li>
+        <li class="stage">
+          <div class="stage__scope"><svg viewBox="0 0 360 180" data-scope="decide" aria-hidden="true"></svg></div>
+          <div class="stage__body">
+            <h3 class="stage__name"><small>Stage 4</small>Decide</h3>
+            <p class="stage__text">A CD4013 D flip‑flop remembers the direction. Each time power falls, it toggles, and the tracker turns around.</p>
+            <ul class="chips"><li>CD4013A</li><li>Direction bit</li></ul>
+          </div>
+        </li>
+        <li class="stage">
+          <div class="stage__scope"><svg viewBox="0 0 360 180" data-scope="integrate" aria-hidden="true"></svg></div>
+          <div class="stage__body">
+            <h3 class="stage__name"><small>Stage 5</small>Integrate</h3>
+            <p class="stage__text">R19 and C14 (5 kΩ, 15 µF) integrate the flip‑flop output into a slowly moving reference, Vref. This trace is the real one from the simulation.</p>
+            <ul class="chips"><li>R19 5 kΩ</li><li>C14 15 µF</li><li>Vref</li></ul>
+          </div>
+        </li>
+        <li class="stage">
+          <div class="stage__scope"><svg viewBox="0 0 360 180" data-scope="modulate" aria-hidden="true"></svg></div>
+          <div class="stage__body">
+            <h3 class="stage__name"><small>Stage 6</small>Modulate</h3>
+            <p class="stage__text">A 555 timer produces the triangle carrier. A second LM319 compares it with Vref: the higher Vref, the wider each pulse. That is the PWM.</p>
+            <ul class="chips"><li>555 timer</li><li>LM319</li><li>PWM</li></ul>
+          </div>
+        </li>
+        <li class="stage">
+          <div class="stage__scope"><svg viewBox="0 0 360 180" data-scope="drive" aria-hidden="true"></svg></div>
+          <div class="stage__body">
+            <h3 class="stage__name"><small>Stage 7</small>Drive</h3>
+            <p class="stage__text">A 2N2219 / 2N2605 push‑pull stage drives the IRF540 gate. The Boost (300 µH, 1N5406, 200 µF) moves the panel’s operating point and feeds the 50 Ω load.</p>
+            <ul class="chips"><li>IRF540</li><li>L1 300 µH</li><li>1N5406</li></ul>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 03 THE CIRCUIT: schematic tour -->
+  <section class="p-sec p-sec--paper schem" id="circuit" aria-labelledby="circuit-title">
+    <div class="schem__pin">
+      <div class="wrap">
+        <div class="sec-head"><span>03</span><span>The circuit</span></div>
+        <div class="schem__grid">
+          <div>
+            <h2 class="h2" id="circuit-title" data-split>The whole tracker on one sheet.</h2>
+            <div class="schem__caps">
+              <div class="schem__cap"><h3>The full schematic</h3><p>Power stage on top, control below, supplies on the right. Scroll to walk through it block by block.</p></div>
+              <div class="schem__cap"><h3>Boost power stage</h3><p>L1 300 µH, the IRF540 MOSFET, a 1N5406 diode, 2000 µF on the panel side and 200 µF on the output, into a 50 Ω load. The duty cycle sets the voltage the panel sees.</p></div>
+              <div class="schem__cap"><h3>555 oscillator</h3><p>A 555 timer with its RC network makes the triangle carrier the PWM comparator needs.</p></div>
+              <div class="schem__cap"><h3>PWM and gate drive</h3><p>An LM319 compares Vref with the triangle. Its output drives the 2N2219 / 2N2605 push‑pull pair, which charges and discharges the MOSFET gate quickly. 1N4750 zeners clamp the gate.</p></div>
+              <div class="schem__cap"><h3>Sensing and power</h3><p>The divider and the 120 mΩ shunt with its µA741 feed the multiplier, which outputs a voltage proportional to P = V × I.</p></div>
+              <div class="schem__cap"><h3>The decision</h3><p>The second LM319 compares power with its RC‑delayed copy. The CD4013 flip‑flop holds the direction, and R19 / C14 integrate it into Vref.</p></div>
+              <div class="schem__cap"><h3>Supplies</h3><p>An LM7805 regulator for the logic and ±15 V rails for the comparators and the op‑amp.</p></div>
+            </div>
+            <div class="schem__dots" aria-hidden="true"><span class="is-on"></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          </div>
+          <div class="schem__frame">
+            <div class="schem__zoom">
+              <img src="../assets/img/projects/mppt-schematic.jpg" width="852" height="630" alt="OrCAD PSpice schematic of the analog MPPT: PV panel model, Boost converter with IRF540, 555 oscillator, LM319 comparators, CD4013 flip-flop, µA741 and push-pull driver" loading="lazy">
+              <svg class="schem__hl" viewBox="0 0 852 630" preserveAspectRatio="none" aria-hidden="true">
+                <path class="schem__dim" d="M0 0H852V630H0Z"/>
+                <rect class="schem__box" x="0" y="0" width="852" height="630" rx="8" opacity="0"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="wrap">
+      <table class="bom" data-reveal>
+        <caption>Main parts</caption>
+        <thead><tr><th>Ref.</th><th>Value</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>L1</td><td>300 µH</td><td>Boost inductor</td></tr>
+          <tr><td>M1</td><td>IRF540</td><td>Power MOSFET, the switch the PWM drives</td></tr>
+          <tr><td>D1</td><td>1N5406</td><td>Boost diode</td></tr>
+          <tr><td>C7 · C8</td><td>2000 µF · 200 µF</td><td>Panel‑side and output capacitors</td></tr>
+          <tr><td>R2</td><td>50 Ω</td><td>Load</td></tr>
+          <tr><td>R13</td><td>120 mΩ</td><td>Current shunt</td></tr>
+          <tr><td>U1</td><td>555</td><td>Triangle oscillator</td></tr>
+          <tr><td>U2 · U4</td><td>LM319</td><td>PWM comparator · power comparator</td></tr>
+          <tr><td>U5</td><td>CD4013A</td><td>D flip‑flop, direction memory</td></tr>
+          <tr><td>U6</td><td>µA741</td><td>Shunt amplifier</td></tr>
+          <tr><td>Q1 · Q2</td><td>2N2219 · 2N2605</td><td>Push‑pull gate driver</td></tr>
+          <tr><td>R19 · C14</td><td>5 kΩ · 15 µF</td><td>Integrator that builds Vref</td></tr>
+          <tr><td>U3</td><td>LM7805C</td><td>5 V regulator</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 04 THE ANALYSIS: scrubbed traces -->
+  <section class="p-sec p-sec--navy analysis" id="analysis" aria-labelledby="analysis-title">
+    <div class="an__pin">
+      <div class="wrap">
+        <div class="sec-head"><span>04</span><span>The analysis</span></div>
+        <div class="p-head">
+          <h2 class="h2" id="analysis-title" data-split>The proof is in the trace.</h2>
+          <p class="lede" data-reveal>Both curves are redrawn from my PSpice run, 0 to 160 ms. Scroll to play the simulation.</p>
+        </div>
+        <div class="an__grid">
+          <div class="chart-card an__charts">
+            <p class="an__read" aria-live="off"><span>t = <b data-t>0.0</b> ms</span><span class="p">P = <b data-p>0.0</b> W</span><span class="v">Vref = <b data-v>0.00</b> V</span></p>
+            <svg class="chart-svg" id="an-svg" viewBox="0 0 900 560" role="img" aria-label="Simulated PV power rising to about 73 watts and the control voltage Vref ramping to about 3 volts, over 160 milliseconds">
+              <g class="bands"></g>
+              <g class="ax" id="an-ax"></g>
+              <path class="tr tr--sun" id="an-p" d=""/>
+              <path class="tr tr--sky" id="an-v" d=""/>
+              <g class="an__peak" id="an-peak" opacity="0"><line x1="0" y1="0" x2="0" y2="0"/><text x="0" y="0">73.6 W start‑up peak</text></g>
+              <line class="an__cursor" id="an-cur" x1="0" x2="0" y1="0" y2="0"/>
+              <circle class="an__dot" id="an-dp" r="6"/>
+              <circle class="an__dot an__dot--v" id="an-dv" r="5"/>
+              <g id="an-mpp-g"><path class="an__mpp" id="an-mpp" d=""/></g>
+            </svg>
+          </div>
+          <ol class="an__phases">
+            <li class="an__phase is-on" data-from="0" data-to="19"><h3>Start‑up <span>0 – 19 ms</span></h3><p>The capacitors charge and the panel sweeps from short circuit to open circuit. On the way it crosses its true maximum, 73.6 W at 7.8 ms, then power falls to 14 W near open‑circuit voltage.</p></li>
+            <li class="an__phase" data-from="19" data-to="92"><h3>Tracking <span>10 – 92 ms</span></h3><p>From 10 ms the integrator ramps Vref, the duty cycle grows and the Boost pulls the panel back down its curve. Power climbs from 14 W to 72 W in about 75 ms.</p></li>
+            <li class="an__phase" data-from="92" data-to="161"><h3>Locked <span>92 ms →</span></h3><p>Vref turns into a 2.9–3.1 V triangle with a period of about 11 ms: the flip‑flop reverses every time power dips. Power holds at about 73 W, with roughly ±1 W of ripple.</p></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="p-sec p-sec--navy" style="padding-top:0" aria-labelledby="verdict-title">
+    <div class="wrap">
+      <div class="p-two an__verdict">
+        <h2 class="h2" id="verdict-title" data-split>It found the real peak.</h2>
+        <p class="lede" data-reveal style="margin-top:0">The power it holds in steady state, about 73 W, matches the 73.6 W the panel showed when the start‑up sweep crossed its maximum. The tracker settles on the panel’s actual maximum power point, and the small triangle on Vref is perturb and observe doing exactly what it should.</p>
+      </div>
+      <div class="p-stats">
+        <div><b><span data-count="73.6">73.6</span><small>W</small></b><span>peak crossed during start‑up</span></div>
+        <div><b>≈<span data-count="73">73</span><small>W</small></b><span>held at the maximum power point</span></div>
+        <div><b>≈<span data-count="90">90</span><small>ms</small></b><span>from start‑up to lock</span></div>
+        <div><b>±<span data-count="1">1</span><small>W</small></b><span>ripple while hunting the peak</span></div>
+        <div><b><span data-count="0">0</span></b><span>lines of code: comparators, RC and a flip‑flop</span></div>
+      </div>
+      <div class="p-pair">
+        <figure class="p-figure" data-reveal>
+          <div class="p-figure__frame"><img src="../assets/img/projects/mppt-power.jpg" width="1649" height="526" loading="lazy" alt="PSpice plot of PV power over 160 ms: a peak near 73 W at 8 ms, a dip to 14 W, then a climb that settles at about 73 W"></div>
+          <figcaption>Original PSpice trace: V(R11:2) × |I(R13)|, the panel power, 0–160 ms.</figcaption>
+        </figure>
+        <figure class="p-figure" data-reveal>
+          <div class="p-figure__frame"><img src="../assets/img/projects/mppt-vref.jpg" width="1507" height="475" loading="lazy" alt="PSpice plot of the reference voltage: flat until 10 ms, rising to about 3.1 V at 97 ms, then a small triangle around 3 V"></div>
+          <figcaption>Original PSpice trace: V(U2A:+), the reference fed to the PWM comparator.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 SCOPE + SKILLS -->
+  <section class="p-sec p-sec--paper" aria-labelledby="scope-title">
+    <div class="wrap">
+      <div class="sec-head"><span>05</span><span>Scope of work</span></div>
+      <div class="p-two">
+        <h2 class="h2" id="scope-title" data-split>What I built, step by step.</h2>
+        <ol class="p-scope" data-stagger>
+          <li>Modelled a photovoltaic module and analysed its electrical behaviour, Vpv and Ipv.</li>
+          <li>Designed a DC‑DC Boost converter to match the panel’s impedance to the load.</li>
+          <li>Built an analog MPPT from comparators, RC circuits, a triangle oscillator and sequential logic.</li>
+          <li>Generated the PWM signal that drives the power MOSFET.</li>
+          <li>Checked that the tracker follows the maximum power point as irradiance and load change.</li>
+        </ol>
+      </div>
+      <div class="p-skills" style="margin-top:clamp(60px,7vw,100px)">
+        <p class="sec-head" style="margin-bottom:22px"><span>Skills</span><span></span></p>
+        <ul class="chips" data-stagger><li>OrCAD PSpice</li><li>OrCAD</li><li>Power Electronics</li><li>Photovoltaics</li><li>Solar PV Design</li><li>Analog Circuit Design</li><li>Power Electronics Design</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <a class="next" href="parallel-inverters.html" data-transition>
+    <span class="next__label">Next case study · 02</span>
+    <span class="next__title">Deux onduleurs parallèles</span>
+    <span class="next__arrow" aria-hidden="true">→</span>
+  </a>
+</main>
+
+<footer class="contact p-foot" id="contact" aria-labelledby="contact-title">
+  <div class="contact__inner wrap">
+    <div class="sec-head sec-head--navy"><span>Contact</span><a href="../index.html" data-transition>Back to home</a></div>
+    <h2 class="contact__title" id="contact-title">
+      <span class="contact__line">Let’s talk</span>
+      <span class="contact__line">energy<svg class="contact__mark" viewBox="0 0 159 158" aria-hidden="true"><use href="#union"/></svg></span>
+    </h2>
+    <div class="contact__row">
+      <a class="contact__mail" href="mailto:omar.elmou14@gmail.com?subject=Hello%20Omar">omar.elmou14@gmail.com</a>
+      <div class="contact__btns">
+        <a class="pill" href="https://www.linkedin.com/in/omar-el-mourabit-8986282ab/" target="_blank" rel="noopener">LinkedIn <span aria-hidden="true">↗</span></a>
+        <a class="pill" href="tel:+212669944301">+212 669 944 301</a>
+        <a class="pill pill--solid" href="../assets/cv/Omar-El-Mourabit-CV.pdf" download>Download CV <span aria-hidden="true">↓</span></a>
+      </div>
+    </div>
+    <div class="contact__foot">
+      <span>© 2026 Omar El Mourabit</span>
+      <span><span data-clock>--:--</span> <span data-offset>GMT+1</span> · Casablanca</span>
+      <a href="#" data-top>Back to top ↑</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/DrawSVGPlugin.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/MorphSVGPlugin.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js"></script>
+<script src="../assets/js/core.js?v=6"></script>
+<script src="../assets/js/project.js?v=6"></script>
+<script src="../assets/js/mppt.js?v=6"></script>
+</body>
+</html>

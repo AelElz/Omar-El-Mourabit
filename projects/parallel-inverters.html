@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Parallel PV inverters on dSPACE — Omar El Mourabit</title>
+  <meta name="description" content="Réalisation et commande de deux onduleurs parallèles pour une chaîne photovoltaïque: Boost with P&amp;O MPPT, SPWM three-phase inverters, dSPACE DS1104 real-time control and a PCB designed in Proteus. Case study by Omar El Mourabit.">
+  <meta name="theme-color" content="#1B4F72">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.css">
+  <link rel="stylesheet" href="../assets/css/main.css?v=6">
+  <link rel="stylesheet" href="../assets/css/project.css?v=6">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body class="p-page" data-page="inverters" data-root="../">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="union" viewBox="0 0 159 158">
+      <path id="union-path" fill="currentColor" d="M90.4023 0.0107422C90.5815 0.00821822 90.7602 0.00746915 90.9385 0.00488281C91.3222 16.9644 90.6103 34.4606 91.0908 51.4082C98.7402 43.0194 107.931 34.6354 115.848 26.4375C119.29 22.8728 124.187 18.5642 127.302 14.8799C128.359 16.5592 141.511 29.643 143.479 31.2715C141.141 33.3945 138.558 36.1288 136.282 38.417L122.388 52.4043L112.807 61.8789C111.366 63.2967 108.399 66.1222 107.236 67.5645C119.023 67.4462 130.81 67.4213 142.597 67.4893C147.382 67.4898 153.72 67.6871 158.378 67.4111L158.411 90.5488C154.022 90.1228 144.422 90.4071 139.551 90.4131C128.76 90.3481 117.969 90.3826 107.179 90.5186C116.356 99.3595 125.35 108.867 134.499 117.781C137.396 120.603 140.613 124.193 143.46 126.859C140.516 129.393 137.024 133.138 134.196 135.91C132.474 137.598 128.741 141.208 127.296 143L110.801 126.561C104.392 120.083 97.5999 113.048 91.0176 106.77L91.0254 157.96C90.7298 157.96 90.4336 157.961 90.1377 157.962V157.964C86.5143 158.002 82.8608 158.003 79.2051 157.994C75.5497 158.003 71.8965 158.002 68.2734 157.964L68.2725 157.962C67.9769 157.961 67.681 157.96 67.3857 157.96L67.3936 106.77C60.8112 113.048 54.0187 120.083 47.6104 126.561L31.1152 143C29.6701 141.208 25.9371 137.598 24.2148 135.91C21.3868 133.138 17.8954 129.393 14.9512 126.859C17.798 124.193 21.0154 120.603 23.9121 117.781C33.0609 108.867 42.0551 99.3595 51.2324 90.5186C40.4423 90.3826 29.651 90.3481 18.8604 90.4131C13.9892 90.4071 4.38918 90.1228 0 90.5488L0.0332031 67.4111C4.69141 67.6871 11.0288 67.4898 15.8145 67.4893C27.6014 67.4213 39.3885 67.4462 51.1748 67.5645C50.0124 66.1222 47.0447 63.2967 45.6045 61.8789L36.0234 52.4043L22.1289 38.417C19.8533 36.1288 17.2705 33.3945 14.9316 31.2715C16.9 29.643 30.0526 16.5592 31.1094 14.8799C34.2243 18.5642 39.1213 22.8728 42.5635 26.4375C50.4801 34.6354 59.6709 43.0194 67.3203 51.4082C67.8008 34.4606 67.089 16.9644 67.4727 0.00488281C67.6506 0.00746445 67.829 0.00822269 68.0078 0.0107422V0C68.5618 0.0126391 69.1204 0.0210645 69.6826 0.03125C72.9298 0.0724011 76.2903 0.103649 79.6406 0.105469C82.7014 0.0996992 85.7617 0.0688328 88.7275 0.03125C89.29 0.02106 89.849 0.0126464 90.4033 0L90.4023 0.0107422Z"/>
+    </symbol>
+  </defs>
+</svg>
+
+<a class="skip" href="#chain">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../index.html" data-transition aria-label="Omar El Mourabit, home">
+    <svg class="brand__mark" viewBox="0 0 159 158" aria-hidden="true"><use href="#union"/></svg>
+    <span class="brand__name">Omar El Mourabit</span>
+  </a>
+</header>
+<a class="p-back" href="../index.html#projects" data-transition><span aria-hidden="true">←</span> <b>All projects</b></a>
+
+<main>
+  <!-- HERO -->
+  <section class="p-hero p-hero--steel inv-hero" aria-labelledby="p-title">
+    <div class="p-hero__top" aria-hidden="true"><span>Case study <b>02</b></span><span>Feb — Jun 2025</span><span>MATLAB / Simulink · dSPACE</span></div>
+    <svg class="inv-hero__wave" viewBox="0 0 1440 300" preserveAspectRatio="none" aria-hidden="true">
+      <path class="w2" d=""/>
+      <path class="w1" d=""/>
+    </svg>
+    <div class="wrap inv-hero__grid">
+      <div class="inv-hero__text">
+        <p class="p-hero__kicker">Case study 02 · Feb — Jun 2025</p>
+        <h1 id="p-title" data-split>Réalisation et commande de deux onduleurs parallèles pour une chaîne photovoltaïque</h1>
+        <p class="p-hero__sub" data-reveal>Two three‑phase inverters, each fed by its own PV array and Boost‑MPPT stage, sharing one load. Modelled in MATLAB/Simulink, driven in real time from a dSPACE DS1104, and built on a board I laid out in Proteus.</p>
+        <dl class="p-facts" data-stagger>
+          <div><dt>Period</dt><dd>Feb — Jun 2025</dd></div>
+          <div><dt>Modelling</dt><dd>MATLAB / Simulink</dd></div>
+          <div><dt>Real time</dt><dd>dSPACE DS1104</dd></div>
+          <div><dt>Board</dt><dd>Designed in Proteus</dd></div>
+        </dl>
+      </div>
+      <figure class="inv-hero__board">
+        <img src="../assets/img/projects/inv-board.jpg" width="960" height="1280" alt="The finished inverter board on a wooden table: perfboard with transistor legs, green terminal blocks and four copper toroidal inductors">
+      </figure>
+    </div>
+  </section>
+
+  <!-- 01 THE CHAIN -->
+  <section class="p-sec p-sec--navy" id="chain" aria-labelledby="chain-title">
+    <div class="wrap">
+      <div class="sec-head"><span>01</span><span>The chain</span></div>
+      <div class="p-head">
+        <h2 class="h2" id="chain-title" data-split>Two sources, two converters, one load.</h2>
+        <p class="lede" data-reveal>Each branch is a complete PV chain: array, Boost with perturb‑and‑observe MPPT, three‑phase inverter and LC filter. Both inverters feed the same three‑phase R‑L load.</p>
+      </div>
+      <div class="chart-card arch" data-reveal>
+        <svg viewBox="0 0 1200 520" id="arch" role="img" aria-label="Block diagram: two PV arrays, each through a Boost with MPPT and a three-phase inverter with LC filter, joining a common bus that feeds a three-phase R-L load">
+          <g class="wires">
+            <path class="wire wire--dc" d="M170 110 H230 M400 110 H460"/>
+            <path class="wire wire--dc" d="M170 390 H230 M400 390 H460"/>
+            <path class="wire" d="M640 110 H700 M840 110 H920 V390 H840 M640 390 H700"/>
+            <path class="wire" d="M920 250 H980"/>
+          </g>
+          <path class="pulse" d="M170 110 H230 M400 110 H460"/>
+          <path class="pulse" d="M170 390 H230 M400 390 H460"/>
+          <path class="pulse pulse--ac" d="M640 110 H700 M840 110 H920 V250 H980"/>
+          <path class="pulse pulse--ac" d="M640 390 H700 M840 390 H920 V250 H980"/>
+          <g class="blk blk--pv"><rect x="30" y="60" width="140" height="100" rx="18"/><text x="100" y="105">PV array 1</text><text class="s" x="100" y="128">1000 W/m² · 25 °C</text></g>
+          <g class="blk"><rect x="230" y="60" width="170" height="100" rx="18"/><text x="315" y="105">Boost</text><text class="s" x="315" y="128">P&amp;O MPPT</text></g>
+          <g class="blk"><rect x="460" y="60" width="180" height="100" rx="18"/><text x="550" y="105">Inverter 1</text><text class="s" x="550" y="128">6 IGBTs · SPWM</text></g>
+          <g class="blk"><rect x="700" y="60" width="140" height="100" rx="18"/><text x="770" y="105">LC filter</text><text class="s" x="770" y="128">L + C, star</text></g>
+          <g class="blk blk--pv"><rect x="30" y="340" width="140" height="100" rx="18"/><text x="100" y="385">PV array 2</text><text class="s" x="100" y="408">1000 W/m² · 25 °C</text></g>
+          <g class="blk"><rect x="230" y="340" width="170" height="100" rx="18"/><text x="315" y="385">Boost 2</text><text class="s" x="315" y="408">P&amp;O MPPT</text></g>
+          <g class="blk"><rect x="460" y="340" width="180" height="100" rx="18"/><text x="550" y="385">Inverter 2</text><text class="s" x="550" y="408">6 IGBTs · SPWM</text></g>
+          <g class="blk"><rect x="700" y="340" width="140" height="100" rx="18"/><text x="770" y="385">LC filter</text><text class="s" x="770" y="408">L + C, star</text></g>
+          <g class="blk blk--load"><rect x="980" y="195" width="190" height="110" rx="18"/><text x="1075" y="243">R‑L load</text><text class="s" x="1075" y="267">three‑phase</text></g>
+          <text class="lbl" x="420" y="96">DC</text><text class="lbl" x="660" y="96">AC</text><text class="lbl" x="928" y="240">bus</text>
+        </svg>
+      </div>
+      <figure class="p-figure p-figure--white" data-reveal style="margin-top:clamp(28px,3vw,44px)">
+        <div class="p-figure__frame"><img src="../assets/img/projects/inv-simulink.jpg" width="1302" height="581" loading="lazy" alt="The Simulink model: two PV array blocks set to 1000 and 25, Boost and inverter subsystems, V-I measurement blocks, LC filters and a shared three-phase R-L load with scopes"></div>
+        <figcaption>The Simulink model: two PV arrays (1000 W/m², 25 °C), Boost and inverter subsystems, LC filters, the shared R‑L load and the scopes, discrete solver at 1 µs.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 02 SPWM live -->
+  <section class="p-sec p-sec--paper" id="spwm" aria-labelledby="spwm-title">
+    <div class="wrap">
+      <div class="sec-head"><span>02</span><span>The modulation</span></div>
+      <div class="p-head">
+        <h2 class="h2" id="spwm-title" data-split>Sine in, pulses out.</h2>
+        <p class="lede" data-reveal>Each leg compares its sine reference with one shared triangle carrier. Where the sine is higher, the upper IGBT conducts, and a NOT gate drives the lower one. That is the SPWM block of my model. Change the modulation and watch the pulses.</p>
+      </div>
+      <div class="spwm" data-ui>
+        <div class="chart-card spwm__chart">
+          <svg class="chart-svg" id="spwm-svg" viewBox="0 0 900 600" role="img" aria-label="Three sine references and a triangle carrier, the three resulting gate signals, and the line-to-line voltage with its fundamental">
+            <g class="ax" id="spwm-ax"></g>
+            <path class="carrier" id="sp-car" d=""/>
+            <path class="tr tr--sun" id="sp-a" d=""/>
+            <path class="tr tr--sky" id="sp-b" d=""/>
+            <path class="tr" id="sp-c" d="" style="stroke:#f2a7c3"/>
+            <path class="gate gate--a" id="sp-s1" d=""/>
+            <path class="gate gate--b" id="sp-s3" d=""/>
+            <path class="gate gate--c" id="sp-s5" d=""/>
+            <path class="vline" id="sp-vab" d=""/>
+            <path class="vfund" id="sp-fund" d=""/>
+          </svg>
+        </div>
+        <div class="pv__panel">
+          <div class="pv__ctl">
+            <label for="sp-m">Modulation index m <output id="sp-m-out">0.80</output></label>
+            <input class="range" id="sp-m" type="range" min="0.1" max="1" step="0.01" value="0.8">
+            <p>Lower m, narrower pulses, smaller output voltage.</p>
+          </div>
+          <div class="pv__ctl">
+            <label for="sp-f">Carrier ratio <output id="sp-f-out">15</output></label>
+            <input class="range" id="sp-f" type="range" min="3" max="33" step="3" value="15">
+            <p>More carrier periods per sine: more pulses, cleaner current, more switching losses.</p>
+          </div>
+          <div class="pv__btns"><button class="seg" type="button" id="sp-play" aria-pressed="true">Running</button></div>
+          <dl class="pv__read">
+            <div><dt>Switching at 50 Hz</dt><dd><span id="sp-fs">750</span><small>Hz</small></dd></div>
+            <div><dt>Pulses per cycle</dt><dd><span id="sp-pulses">15</span></dd></div>
+            <div class="is-key"><dt>Line voltage, fundamental</dt><dd><span id="sp-vll">0.69</span><small>× Vdc</small></dd></div>
+            <div class="is-key"><dt>Phases apart</dt><dd>120<small>°</small></dd></div>
+          </dl>
+        </div>
+      </div>
+      <p class="pv__note">In the linear range (m ≤ 1) the peak line‑to‑line fundamental is √3/2 · m · Vdc, shown here as a fraction of the DC‑link voltage. The waveforms are computed live from the same comparison the Simulink block makes.</p>
+      <figure class="p-figure p-figure--white" data-reveal style="margin-top:clamp(40px,4vw,60px)">
+        <div class="p-figure__frame"><img src="../assets/img/projects/inv-spwm.jpg" width="1116" height="563" loading="lazy" alt="Simulink SPWM generator: three sine sources and a sawtooth compared with greater-or-equal blocks to make gate signals s1 to s6 with NOT gates, next to the six-IGBT inverter bridge"></div>
+        <figcaption>From my model: three sines against the carrier, ≥ 0 comparators, NOT gates for s2, s4, s6, and the six‑IGBT bridge they drive.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 03 SHARING -->
+  <section class="p-sec p-sec--navy" id="share" aria-labelledby="share-title">
+    <div class="wrap">
+      <div class="sec-head"><span>03</span><span>In parallel</span></div>
+      <div class="p-head">
+        <h2 class="h2" id="share-title" data-split>When the second one joins, the load splits.</h2>
+        <p class="lede" data-reveal>Scroll: inverter 2 comes online and takes its half of the load current. The two only add up cleanly when they share frequency, phase and amplitude; any mismatch turns into current circulating between them instead of reaching the load.</p>
+      </div>
+      <div class="chart-card share__chart">
+        <p class="share__legend"><span><i style="background:#FFD24A"></i>Inverter 1 · <b data-s1>100</b>%</span><span><i style="background:#8cc3ea"></i>Inverter 2 · <b data-s2>0</b>%</span><span><i style="background:#F7F9FC"></i>Load current</span></p>
+        <svg class="chart-svg" id="share-svg" viewBox="0 0 900 360" role="img" aria-label="Phase-A currents of inverter 1, inverter 2 and the load as the second inverter takes half the load">
+          <g class="ax" id="share-ax"></g>
+          <path class="tr tr--paper" id="sh-l" d=""/>
+          <path class="tr tr--sun" id="sh-1" d=""/>
+          <path class="tr tr--sky" id="sh-2" d=""/>
+        </svg>
+      </div>
+      <p class="pv__note" style="color:var(--ink-soft)">Principle of current sharing, phase A, normalised. Illustration, not measured data.</p>
+    </div>
+  </section>
+
+  <!-- 04 REAL TIME -->
+  <section class="p-sec p-sec--steel" aria-labelledby="rt-title">
+    <div class="wrap">
+      <div class="sec-head"><span>04</span><span>Real time</span></div>
+      <div class="p-head">
+        <h2 class="h2" id="rt-title" data-split>From Simulink to the switches, live.</h2>
+        <p class="lede" data-reveal>The control part of the model runs on a dSPACE DS1104 board, which turns it into real PWM signals for the inverter while the circuit is running.</p>
+      </div>
+      <ol class="rt" data-stagger>
+        <li><h3>Model</h3><p>PV arrays, Boost, MPPT and SPWM, all in MATLAB/Simulink.</p></li>
+        <li><h3>Build</h3><p>The control blocks are compiled for the DS1104 straight from the model.</p></li>
+        <li><h3>Run</h3><p>The board executes the control in real time and outputs the gate signals.</p></li>
+        <li><h3>Watch</h3><p>Signals are monitored and adjusted on the PC while the hardware runs.</p></li>
+      </ol>
+      <blockquote class="p-quote" data-words style="margin-top:clamp(70px,8vw,120px)">
+        It was also the first time I worked with a board as powerful as the dSPACE DS1104, and its advantages are genuinely impressive.
+        <footer>Omar, on the project</footer>
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- 05 PCB: stacked cards -->
+  <section class="p-sec p-sec--paper" id="pcb" aria-labelledby="pcb-title">
+    <div class="wrap">
+      <div class="sec-head"><span>05</span><span>The board</span></div>
+      <div class="p-head">
+        <h2 class="h2" id="pcb-title" data-split>From layout to solder.</h2>
+        <p class="lede" data-reveal>The hardware was the part I knew least: choosing the components, laying out the board in Proteus, then building it.</p>
+      </div>
+      <div class="pstack">
+        <article class="pcard pcard--a" style="--i:0">
+          <div><p class="pcard__step">01</p><h3>Routing in Proteus</h3><p>Two copper layers, red on top and blue underneath, with the wide traces of the power path kept short.</p><ul class="chips"><li>Proteus</li><li>Two layers</li><li>Power routing</li></ul></div>
+          <div class="pcard__media"><img src="../assets/img/projects/inv-pcb-layout.jpg" width="1037" height="828" loading="lazy" alt="Proteus PCB layout on a dark blue grid with red top-layer and blue bottom-layer traces, ICs, transistors and inductor footprints"></div>
+        </article>
+        <article class="pcard pcard--b" style="--i:1">
+          <div><p class="pcard__step">02</p><h3>Checking it in 3D</h3><p>The 3D view catches what a 2D layout hides: tall inductors, terminal blocks at the edge, room to solder.</p><ul class="chips"><li>3D preview</li><li>Placement</li></ul></div>
+          <div class="pcard__media"><img src="../assets/img/projects/inv-pcb-3d.jpg" width="1050" height="815" loading="lazy" alt="3D render of the board in Proteus: green PCB with black inductor blocks, ICs and terminal connectors"></div>
+        </article>
+        <article class="pcard pcard--c" style="--i:2">
+          <div><p class="pcard__step">03</p><h3>The board, built</h3><p>Transistor legs with their terminals, four toroidal filter inductors and the electrolytic capacitors, ready for the DS1104.</p><ul class="chips"><li>Soldering</li><li>Toroidal inductors</li><li>Bring‑up</li></ul></div>
+          <div class="pcard__media"><img src="../assets/img/projects/inv-board.jpg" width="960" height="1280" loading="lazy" alt="The built board seen from above on a wooden table"></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 SCOPE -->
+  <section class="p-sec p-sec--navy" aria-labelledby="scope-title">
+    <div class="wrap">
+      <div class="sec-head"><span>06</span><span>Scope of work</span></div>
+      <div class="p-two">
+        <h2 class="h2" id="scope-title" data-split>What I built, step by step.</h2>
+        <ol class="p-scope" data-stagger>
+          <li>Modelled and simulated the whole system in MATLAB/Simulink.</li>
+          <li>Integrated a Boost converter driven by a perturb‑and‑observe MPPT to extract the most PV energy.</li>
+          <li>Controlled both inverters with sinusoidal PWM.</li>
+          <li>Ran the control in real time on a dSPACE DS1104.</li>
+          <li>Designed the printed circuit board in Proteus.</li>
+        </ol>
+      </div>
+      <blockquote class="p-quote" data-words style="margin-top:clamp(70px,8vw,120px)">
+        This project taught me a lot I did not master before, above all on the hardware side, and deepened what I know about renewable energy and power electronics.
+        <footer>Omar, on the project</footer>
+      </blockquote>
+      <div class="p-skills" style="margin-top:clamp(60px,7vw,100px)">
+        <p class="sec-head" style="margin-bottom:22px"><span>Skills</span><span></span></p>
+        <ul class="chips" data-stagger><li>Power Electronics</li><li>MATLAB</li><li>Printed Circuit Board (PCB) Design</li><li>dSPACE</li><li>Simulink</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <a class="next" href="mixing-station.html" data-transition>
+    <span class="next__label">Next case study · 03</span>
+    <span class="next__title">Station de malaxage</span>
+    <span class="next__arrow" aria-hidden="true">→</span>
+  </a>
+</main>
+
+<footer class="contact p-foot" id="contact" aria-labelledby="contact-title">
+  <div class="contact__inner wrap">
+    <div class="sec-head sec-head--navy"><span>Contact</span><a href="../index.html" data-transition>Back to home</a></div>
+    <h2 class="contact__title" id="contact-title">
+      <span class="contact__line">Let’s talk</span>
+      <span class="contact__line">energy<svg class="contact__mark" viewBox="0 0 159 158" aria-hidden="true"><use href="#union"/></svg></span>
+    </h2>
+    <div class="contact__row">
+      <a class="contact__mail" href="mailto:omar.elmou14@gmail.com?subject=Hello%20Omar">omar.elmou14@gmail.com</a>
+      <div class="contact__btns">
+        <a class="pill" href="https://www.linkedin.com/in/omar-el-mourabit-8986282ab/" target="_blank" rel="noopener">LinkedIn <span aria-hidden="true">↗</span></a>
+        <a class="pill" href="tel:+212669944301">+212 669 944 301</a>
+        <a class="pill pill--solid" href="../assets/cv/Omar-El-Mourabit-CV.pdf" download>Download CV <span aria-hidden="true">↓</span></a>
+      </div>
+    </div>
+    <div class="contact__foot">
+      <span>© 2026 Omar El Mourabit</span>
+      <span><span data-clock>--:--</span> <span data-offset>GMT+1</span> · Casablanca</span>
+      <a href="#" data-top>Back to top ↑</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/DrawSVGPlugin.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/MorphSVGPlugin.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js"></script>
+<script src="../assets/js/core.js?v=6"></script>
+<script src="../assets/js/project.js?v=6"></script>
+<script src="../assets/js/inverters.js?v=6"></script>
+</body>
+</html>

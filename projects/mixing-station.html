@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Batching station on S7-300 and WinCC — Omar El Mourabit</title>
+  <meta name="description" content="Conception d’une station de malaxage automatisée sous WinCC et Step 7: sequential control on a Siemens S7-300, WinCC flexible supervision with recipes, alarms, trends and three access levels. Case study by Omar El Mourabit.">
+  <meta name="theme-color" content="#2D2A32">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.css">
+  <link rel="stylesheet" href="../assets/css/main.css?v=6">
+  <link rel="stylesheet" href="../assets/css/project.css?v=6">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body class="p-page" data-page="mixing" data-root="../">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="union" viewBox="0 0 159 158">
+      <path id="union-path" fill="currentColor" d="M90.4023 0.0107422C90.5815 0.00821822 90.7602 0.00746915 90.9385 0.00488281C91.3222 16.9644 90.6103 34.4606 91.0908 51.4082C98.7402 43.0194 107.931 34.6354 115.848 26.4375C119.29 22.8728 124.187 18.5642 127.302 14.8799C128.359 16.5592 141.511 29.643 143.479 31.2715C141.141 33.3945 138.558 36.1288 136.282 38.417L122.388 52.4043L112.807 61.8789C111.366 63.2967 108.399 66.1222 107.236 67.5645C119.023 67.4462 130.81 67.4213 142.597 67.4893C147.382 67.4898 153.72 67.6871 158.378 67.4111L158.411 90.5488C154.022 90.1228 144.422 90.4071 139.551 90.4131C128.76 90.3481 117.969 90.3826 107.179 90.5186C116.356 99.3595 125.35 108.867 134.499 117.781C137.396 120.603 140.613 124.193 143.46 126.859C140.516 129.393 137.024 133.138 134.196 135.91C132.474 137.598 128.741 141.208 127.296 143L110.801 126.561C104.392 120.083 97.5999 113.048 91.0176 106.77L91.0254 157.96C90.7298 157.96 90.4336 157.961 90.1377 157.962V157.964C86.5143 158.002 82.8608 158.003 79.2051 157.994C75.5497 158.003 71.8965 158.002 68.2734 157.964L68.2725 157.962C67.9769 157.961 67.681 157.96 67.3857 157.96L67.3936 106.77C60.8112 113.048 54.0187 120.083 47.6104 126.561L31.1152 143C29.6701 141.208 25.9371 137.598 24.2148 135.91C21.3868 133.138 17.8954 129.393 14.9512 126.859C17.798 124.193 21.0154 120.603 23.9121 117.781C33.0609 108.867 42.0551 99.3595 51.2324 90.5186C40.4423 90.3826 29.651 90.3481 18.8604 90.4131C13.9892 90.4071 4.38918 90.1228 0 90.5488L0.0332031 67.4111C4.69141 67.6871 11.0288 67.4898 15.8145 67.4893C27.6014 67.4213 39.3885 67.4462 51.1748 67.5645C50.0124 66.1222 47.0447 63.2967 45.6045 61.8789L36.0234 52.4043L22.1289 38.417C19.8533 36.1288 17.2705 33.3945 14.9316 31.2715C16.9 29.643 30.0526 16.5592 31.1094 14.8799C34.2243 18.5642 39.1213 22.8728 42.5635 26.4375C50.4801 34.6354 59.6709 43.0194 67.3203 51.4082C67.8008 34.4606 67.089 16.9644 67.4727 0.00488281C67.6506 0.00746445 67.829 0.00822269 68.0078 0.0107422V0C68.5618 0.0126391 69.1204 0.0210645 69.6826 0.03125C72.9298 0.0724011 76.2903 0.103649 79.6406 0.105469C82.7014 0.0996992 85.7617 0.0688328 88.7275 0.03125C89.29 0.02106 89.849 0.0126464 90.4033 0L90.4023 0.0107422Z"/>
+    </symbol>
+  </defs>
+</svg>
+
+<a class="skip" href="#hmi">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../index.html" data-transition aria-label="Omar El Mourabit, home">
+    <svg class="brand__mark" viewBox="0 0 159 158" aria-hidden="true"><use href="#union"/></svg>
+    <span class="brand__name">Omar El Mourabit</span>
+  </a>
+</header>
+<a class="p-back" href="../index.html#projects" data-transition><span aria-hidden="true">←</span> <b>All projects</b></a>
+
+<main>
+  <!-- HERO -->
+  <section class="p-hero p-hero--graphite mlx-hero" aria-labelledby="p-title">
+    <div class="p-hero__top" aria-hidden="true"><span>Case study <b>03</b></span><span>Industrial automation</span><span>SIMATIC STEP 7 · WinCC flexible</span></div>
+    <div class="p-hero__word" aria-hidden="true">MLX‑25</div>
+    <svg class="mlx-hero__svg" viewBox="0 0 640 440" aria-hidden="true">
+      <defs>
+        <clipPath id="hc1"><path d="M60 30H180V120L134 165H106L60 120Z"/></clipPath>
+        <clipPath id="hc2"><path d="M260 30H380V120L334 165H306L260 120Z"/></clipPath>
+        <clipPath id="hc3"><path d="M460 30H580V120L534 165H506L460 120Z"/></clipPath>
+        <clipPath id="hcm"><path d="M190 250H450V340L360 390H280L190 340Z"/></clipPath>
+      </defs>
+      <rect class="mlx-fill hfill" clip-path="url(#hc1)" x="60" y="40" width="120" height="125"/>
+      <rect class="mlx-fill mlx-fill--c hfill" clip-path="url(#hc2)" x="260" y="56" width="120" height="109"/>
+      <rect class="mlx-fill mlx-fill--b hfill" clip-path="url(#hc3)" x="460" y="74" width="120" height="91"/>
+      <rect class="mlx-fill mlx-fill--c mfill" clip-path="url(#hcm)" x="190" y="390" width="260" height="0"/>
+      <path class="mlx-line" d="M60 30H180V120L134 165H106L60 120Z M120 165V200 L300 240"/>
+      <path class="mlx-line" d="M260 30H380V120L334 165H306L260 120Z M320 165V240"/>
+      <path class="mlx-line" d="M460 30H580V120L534 165H506L460 120Z M520 165V200 L340 240"/>
+      <path class="mlx-line" d="M190 250H450V340L360 390H280L190 340Z M320 230V330 M286 330H354 M320 390V420"/>
+      <text class="mppt-hero__label" x="60" y="20">Sable</text><text class="mppt-hero__label" x="260" y="20">Gravier</text><text class="mppt-hero__label" x="460" y="20">Ciment</text>
+    </svg>
+    <div class="wrap p-hero__content">
+      <div>
+        <p class="p-hero__kicker">Case study 03 · Industrial automation</p>
+        <h1 id="p-title" data-split>Conception d’une station de malaxage automatisée sous WinCC et Step 7</h1>
+        <p class="p-hero__sub" data-reveal>A concrete batching station run by a Siemens S7‑300 and supervised in WinCC flexible 2008: sequential control, alarms, trends, recipes and three levels of access.</p>
+      </div>
+      <dl class="p-facts" data-stagger>
+        <div><dt>PLC</dt><dd>S7‑300 · CPU 314C‑2 DP</dd></div>
+        <div><dt>Supervision</dt><dd>WinCC flexible 2008</dd></div>
+        <div><dt>Programming</dt><dd>SIMATIC STEP 7</dd></div>
+        <div><dt>Users</dt><dd>Engineer · Technician · Operator</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- 01 LIVE HMI -->
+  <section class="p-sec p-sec--paper" id="hmi" aria-labelledby="hmi-title">
+    <div class="wrap">
+      <div class="sec-head"><span>01</span><span>The process</span></div>
+      <div class="p-head">
+        <h2 class="h2" id="hmi-title" data-split>Run a batch yourself.</h2>
+        <p class="lede" data-reveal>A working replica of my process screen. Set the recipe and press Marche: the hoppers dose in turn, the pump adds water, the mixer runs, the mixer hopper discharges. Run a few batches and a hopper runs dry. Arrêt d’urgence stops everything.</p>
+      </div>
+      <div class="hmi" data-ui>
+        <div class="hmi__screen">
+          <div class="hmi__bar"><span class="hmi__state" id="hmi-state"><i></i><b>Prêt</b></span><span>MLX‑25 · Vue procédé</span><span data-hmi-clock>--:--:--</span></div>
+          <svg viewBox="0 0 640 430" id="hmi-svg" role="img" aria-label="Process screen: sand, gravel and cement hoppers above a mixer, a water pump on the right and a discharge valve below">
+            <defs>
+              <clipPath id="c-s"><path d="M70 40H190V125L148 165H112L70 125Z"/></clipPath>
+              <clipPath id="c-g"><path d="M250 40H370V125L328 165H292L250 125Z"/></clipPath>
+              <clipPath id="c-c"><path d="M430 40H550V125L508 165H472L430 125Z"/></clipPath>
+              <clipPath id="c-m"><path d="M190 250H430V330L350 372H270L190 330Z"/></clipPath>
+            </defs>
+            <!-- pipes -->
+            <path class="pipe" d="M130 190 L300 238"/><path class="pipe" d="M310 190 V238"/><path class="pipe" d="M490 190 L320 238"/>
+            <path class="pipe" d="M590 330 V262 H430"/>
+            <path class="pipe-in" id="p-s" d="M130 190 L300 238"/><path class="pipe-in" id="p-g" d="M310 190 V238"/><path class="pipe-in" id="p-c" d="M490 190 L320 238"/>
+            <path class="pipe-in" id="p-w" d="M590 330 V262 H430"/>
+            <!-- hoppers -->
+            <rect class="lvl--s" id="l-s" clip-path="url(#c-s)" x="70" y="40" width="120" height="125"/>
+            <rect class="lvl--g" id="l-g" clip-path="url(#c-g)" x="250" y="40" width="120" height="125"/>
+            <rect class="lvl--c" id="l-c" clip-path="url(#c-c)" x="430" y="40" width="120" height="125"/>
+            <path class="tank" style="fill:none" d="M70 40H190V125L148 165H112L70 125Z"/>
+            <path class="tank" style="fill:none" d="M250 40H370V125L328 165H292L250 125Z"/>
+            <path class="tank" style="fill:none" d="M430 40H550V125L508 165H472L430 125Z"/>
+            <path class="valve" id="v-s" d="M116 172 L144 186 V172 L116 186 Z"/>
+            <path class="valve" id="v-g" d="M296 172 L324 186 V172 L296 186 Z"/>
+            <path class="valve" id="v-c" d="M476 172 L504 186 V172 L476 186 Z"/>
+            <text class="t" x="70" y="30">Sable · TRS</text><text class="t" x="250" y="30">Gravier · TRG</text><text class="t" x="430" y="30">Ciment · TRC</text>
+            <rect class="lamp" id="k-s" x="200" y="60" width="18" height="18" rx="3"/><text class="t t--s" x="200" y="96">ETAT</text>
+            <rect class="lamp" id="k-g" x="380" y="60" width="18" height="18" rx="3"/><text class="t t--s" x="380" y="96">ETAT</text>
+            <rect class="lamp" id="k-c" x="560" y="60" width="18" height="18" rx="3"/><text class="t t--s" x="560" y="96">ETAT</text>
+            <!-- mixer -->
+            <rect class="lvl--m" id="l-m" clip-path="url(#c-m)" x="190" y="372" width="240" height="0"/>
+            <path class="tank" style="fill:none" d="M190 250H430V330L350 372H270L190 330Z"/>
+            <path d="M310 236 V318" stroke="#0A2440" stroke-width="4"/>
+            <g id="blade" transform="translate(310 318)"><ellipse class="blade" cx="-26" cy="0" rx="24" ry="6"/><ellipse class="blade" cx="26" cy="0" rx="24" ry="6"/></g>
+            <rect class="lamp" id="k-m" x="440" y="290" width="18" height="18" rx="3"/><text class="t t--s" x="440" y="326">MALAXEUR</text>
+            <text class="t t--n" id="t-mix" x="210" y="275">00:00</text>
+            <path class="valve" id="v-m" d="M296 378 L324 392 V378 L296 392 Z"/>
+            <rect class="lamp" id="k-d" x="250" y="378" width="18" height="18" rx="3"/><text class="t t--s" x="200" y="414">VIDANGE · TRMLT</text>
+            <!-- pump -->
+            <circle class="tank" cx="590" cy="352" r="24"/><path d="M576 352 H604 M590 338 V366" stroke="#0A2440" stroke-width="3" id="pump-x"/>
+            <rect class="lamp" id="k-w" x="556" y="384" width="18" height="18" rx="3"/><text class="t t--s" x="580" y="398">POMPE</text>
+            <!-- weights -->
+            <text class="t t--s" x="522" y="198">POIDS</text>
+            <text class="t t--n" id="w-s" x="522" y="216">S    0 kg</text>
+            <text class="t t--n" id="w-g" x="522" y="232">G    0 kg</text>
+            <text class="t t--n" id="w-c" x="522" y="248">C    0 kg</text>
+            <text class="t t--n" id="w-w" x="70" y="226">Eau  0 L</text>
+          </svg>
+        </div>
+        <div class="hmi__panel">
+          <h3>Recette BPE</h3>
+          <div class="recipe">
+            <label>Sable <output id="r-s-out">700 kg</output><input class="range" id="r-s" type="range" min="200" max="1000" step="10" value="700"></label>
+            <label>Gravier <output id="r-g-out">1100 kg</output><input class="range" id="r-g" type="range" min="300" max="1400" step="10" value="1100"></label>
+            <label>Ciment <output id="r-c-out">350 kg</output><input class="range" id="r-c" type="range" min="150" max="500" step="5" value="350"></label>
+            <label>Eau <output id="r-w-out">175 L</output><input class="range" id="r-w" type="range" min="80" max="250" step="5" value="175"></label>
+          </div>
+          <div class="hmi__btns">
+            <button class="hbtn hbtn--go" type="button" id="b-go">Marche</button>
+            <button class="hbtn hbtn--stop" type="button" id="b-stop">Arrêt d’urgence</button>
+            <button class="hbtn hbtn--reset" type="button" id="b-fill">Remplir réservoirs</button>
+          </div>
+          <div class="alarms" aria-live="polite">
+            <div class="alarms__head"><span>Heure</span><span>Texte</span><span>État</span></div>
+            <ol id="alarm-list"><li class="alarms__empty" style="display:block">No events yet. Press Marche.</li></ol>
+          </div>
+        </div>
+      </div>
+      <p class="pv__note">A browser replica built for this page: the sequence and screen follow my WinCC project, the timings are sped up. Recipe values are an example concrete mix.</p>
+    </div>
+  </section>
+
+  <!-- 02 THE SEQUENCE -->
+  <section class="p-sec p-sec--navy" id="sequence" aria-labelledby="seq-title">
+    <div class="wrap grafcet__wrap">
+      <div class="grafcet__text">
+        <div class="sec-head"><span>02</span><span>The sequence</span></div>
+        <h2 class="h2" id="seq-title" data-split>One step, one job, one condition.</h2>
+        <p class="lede" data-reveal>The PLC program is a sequence. Each step does one thing and waits for its condition before handing over to the next. The emergency stop overrides all of it, from any step.</p>
+        <p class="lede" data-reveal style="margin-top:18px">Scroll to walk the cycle.</p>
+      </div>
+      <div class="grafcet">
+        <svg viewBox="0 0 560 930" class="gf" id="gf" role="img" aria-label="Sequence chart with seven steps: initial, dose sand, dose gravel, dose cement, add water, mix, discharge, looping back to the initial step"></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 ACCESS LEVELS -->
+  <section class="p-sec p-sec--paper" id="access" aria-labelledby="acc-title">
+    <div class="wrap">
+      <div class="sec-head"><span>03</span><span>Access</span></div>
+      <div class="p-head">
+        <h2 class="h2" id="acc-title" data-split>Three people, three sets of keys.</h2>
+        <p class="lede" data-reveal>The interface opens on a login screen. What you can touch depends on who you are.</p>
+      </div>
+      <div class="pstack">
+        <article class="pcard pcard--a" style="--i:0">
+          <div><p class="pcard__step">Ingénieur</p><h3>Sets up the plant</h3>
+            <ul class="perm"><li>Recipes and production parameters</li><li>User accounts and access levels</li><li>Alarm thresholds</li><li>Everything the others can do</li></ul></div>
+          <div class="pcard__media pcard__media--contain" style="background:#f8d5ab"><img src="../assets/img/projects/mlx-recipe.jpg" width="630" height="474" loading="lazy" alt="WinCC recipe screen Recette BPE with sand, gravel and cement weights"></div>
+        </article>
+        <article class="pcard pcard--b" style="--i:1">
+          <div><p class="pcard__step">Technicien</p><h3>Keeps it running</h3>
+            <ul class="perm"><li>Acknowledges alarms</li><li>Trend curves and maintenance statistics</li><li>Starts and stops cycles</li><li class="no">Recipes and parameters</li></ul></div>
+          <div class="pcard__media pcard__media--contain" style="background:#99ccff"><img src="../assets/img/projects/mlx-alarms.jpg" width="637" height="476" loading="lazy" alt="WinCC alarm view with number, time, date, state and text columns, a level bar graph and navigation buttons"></div>
+        </article>
+        <article class="pcard pcard--c" style="--i:2">
+          <div><p class="pcard__step">Opérateur</p><h3>Makes the concrete</h3>
+            <ul class="perm"><li>Starts and stops production cycles</li><li>Follows the process and its alarms</li><li class="no">Alarm acknowledgement</li><li class="no">Recipes and parameters</li></ul></div>
+          <div class="pcard__media pcard__media--contain" style="background:#800000"><img src="../assets/img/projects/mlx-login.jpg" width="634" height="470" loading="lazy" alt="WinCC login screen titled MLX-25 with Login, Déconnexion and Quitter buttons, the FST Marrakech logo and a clock"></div>
+        </article>
+      </div>
+      <p class="pv__note">What each level may do is summarised for this page; the exact rights live in the WinCC user administration.</p>
+    </div>
+  </section>
+
+  <!-- 04 ALARMS & TRENDS -->
+  <section class="p-sec p-sec--navy" aria-labelledby="trend-title">
+    <div class="wrap">
+      <div class="sec-head"><span>04</span><span>Alarms and trends</span></div>
+      <div class="p-head">
+        <h2 class="h2" id="trend-title" data-split>Every level, every alarm, on record.</h2>
+        <p class="lede" data-reveal>Levels are logged as curves, so a hopper running low is visible long before it alarms. On/off and analog alarms are kept apart, and run counters feed the preventive maintenance statistics.</p>
+      </div>
+      <div class="chart-card trend__chart" data-reveal>
+        <p class="share__legend"><span><i style="background:#e3c27a"></i>Sand hopper</span><span><i style="background:#8cc3ea"></i>Gravel hopper</span><span><i style="background:#c9c4bb"></i>Cement hopper</span><span><i style="background:#FFD24A"></i>Mixer</span></p>
+        <svg class="chart-svg" id="trend-svg" viewBox="0 0 900 340" role="img" aria-label="Level curves over four batches: hopper levels step down with each batch, the mixer fills and empties every cycle, then the hoppers are refilled"></svg>
+      </div>
+      <div class="p-two" style="margin-top:clamp(50px,6vw,90px)">
+        <div>
+          <h3 class="xp__proj" style="margin-top:0"><span class="dot" aria-hidden="true"></span>On/off alarms</h3>
+          <ul class="p-scope" style="margin-top:18px" data-stagger><li>Sand, gravel or cement hopper empty</li><li>Pump fault</li><li>Emergency stop pressed</li></ul>
+        </div>
+        <div>
+          <h3 class="xp__proj" style="margin-top:0"><span class="dot" aria-hidden="true"></span>Analog alarms</h3>
+          <ul class="p-scope" style="margin-top:18px" data-stagger><li>Mixer level high</li><li>Hopper level below its threshold</li><li>Weight outside its tolerance</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 SCREENS: horizontal -->
+  <section class="p-sec p-sec--deep shots" aria-labelledby="shots-title">
+    <div class="shots__pin">
+      <div class="wrap">
+        <div class="sec-head"><span>05</span><span>The screens</span></div>
+        <h2 class="h2" id="shots-title" data-split style="margin-bottom:clamp(30px,4vw,56px)">Five screens, one plant.</h2>
+      </div>
+      <div class="shots__track">
+        <figure class="shot"><div class="shot__frame" style="background:#800000"><img src="../assets/img/projects/mlx-login.jpg" width="634" height="470" loading="lazy" alt="Login screen"></div><figcaption><b>Login</b>Who are you? The answer sets your rights.</figcaption></figure>
+        <figure class="shot"><div class="shot__frame"><img src="../assets/img/projects/mlx-process.jpg" width="632" height="477" loading="lazy" alt="Process screen with hoppers, mixer and pump"></div><figcaption><b>Vue procédé</b>Hoppers, pump, mixer and their states, live.</figcaption></figure>
+        <figure class="shot"><div class="shot__frame" style="background:#f8d5ab"><img src="../assets/img/projects/mlx-recipe.jpg" width="630" height="474" loading="lazy" alt="Recipe screen"></div><figcaption><b>Recette BPE</b>Sand, gravel and cement weights per mix.</figcaption></figure>
+        <figure class="shot"><div class="shot__frame"><img src="../assets/img/projects/mlx-alarms.jpg" width="637" height="476" loading="lazy" alt="Alarm screen"></div><figcaption><b>Vue alarme</b>Time, date, state and text of every alarm, with print‑outs.</figcaption></figure>
+        <figure class="shot"><div class="shot__frame shot__frame--wide"><img src="../assets/img/projects/mlx-step7.jpg" width="804" height="138" loading="lazy" alt="STEP 7 project tree: SIMATIC 300 station, CPU 314C-2 DP, S7 program with blocks OB1, OB100, FC1, DB1, DB20"></div><figcaption><b>STEP 7</b>The S7‑300 program behind the screens.</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 UNDER THE HOOD -->
+  <section class="p-sec p-sec--paper" aria-labelledby="blocks-title">
+    <div class="wrap">
+      <div class="sec-head"><span>06</span><span>Under the hood</span></div>
+      <div class="p-head">
+        <h2 class="h2" id="blocks-title" data-split>A small program, cleanly split.</h2>
+        <p class="lede" data-reveal>A SIMATIC 300 station with a CPU 314C‑2 DP. The S7 program holds five blocks.</p>
+      </div>
+      <ul class="blocks" data-stagger>
+        <li><b>OB1</b><span>The main cycle, run on every PLC scan.</span></li>
+        <li><b>OB100</b><span>Warm restart: puts the sequence back at its initial step.</span></li>
+        <li><b>FC1</b><span>The batching sequence and its interlocks.</span></li>
+        <li><b>DB1</b><span>Process data shared with WinCC.</span></li>
+        <li><b>DB20</b><span>Recipe and production parameters.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 07 SCOPE -->
+  <section class="p-sec p-sec--navy" aria-labelledby="scope-title">
+    <div class="wrap">
+      <div class="sec-head"><span>07</span><span>Scope of work</span></div>
+      <div class="p-two">
+        <h2 class="h2" id="scope-title" data-split>What I built, step by step.</h2>
+        <ol class="p-scope" data-stagger>
+          <li>Sequential control of the mixing: hoppers, pump, mixer and discharge.</li>
+          <li>A secure operator interface with engineer, technician and operator access.</li>
+          <li>Real‑time views of the process and of on/off and analog alarms.</li>
+          <li>Level curves and preventive maintenance statistics.</li>
+          <li>Recipe and production parameter management.</li>
+        </ol>
+      </div>
+      <blockquote class="p-quote" data-words style="margin-top:clamp(70px,8vw,120px)">
+        This project grew my skills in automation, SCADA supervision, industrial process safety and the ergonomics of operator screens.
+        <footer>Omar, on the project</footer>
+      </blockquote>
+      <div class="p-skills" style="margin-top:clamp(60px,7vw,100px)">
+        <p class="sec-head" style="margin-bottom:22px"><span>Skills</span><span></span></p>
+        <ul class="chips" data-stagger><li>WinCC Flexible</li><li>SIMATIC STEP 7</li><li>SCADA</li><li>Siemens S7‑300</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <a class="next" href="mppt.html" data-transition>
+    <span class="next__label">Back to case study · 01</span>
+    <span class="next__title">Commande MPPT automatique</span>
+    <span class="next__arrow" aria-hidden="true">→</span>
+  </a>
+</main>
+
+<footer class="contact p-foot" id="contact" aria-labelledby="contact-title">
+  <div class="contact__inner wrap">
+    <div class="sec-head sec-head--navy"><span>Contact</span><a href="../index.html" data-transition>Back to home</a></div>
+    <h2 class="contact__title" id="contact-title">
+      <span class="contact__line">Let’s talk</span>
+      <span class="contact__line">energy<svg class="contact__mark" viewBox="0 0 159 158" aria-hidden="true"><use href="#union"/></svg></span>
+    </h2>
+    <div class="contact__row">
+      <a class="contact__mail" href="mailto:omar.elmou14@gmail.com?subject=Hello%20Omar">omar.elmou14@gmail.com</a>
+      <div class="contact__btns">
+        <a class="pill" href="https://www.linkedin.com/in/omar-el-mourabit-8986282ab/" target="_blank" rel="noopener">LinkedIn <span aria-hidden="true">↗</span></a>
+        <a class="pill" href="tel:+212669944301">+212 669 944 301</a>
+        <a class="pill pill--solid" href="../assets/cv/Omar-El-Mourabit-CV.pdf" download>Download CV <span aria-hidden="true">↓</span></a>
+      </div>
+    </div>
+    <div class="contact__foot">
+      <span>© 2026 Omar El Mourabit</span>
+      <span><span data-clock>--:--</span> <span data-offset>GMT+1</span> · Casablanca</span>
+      <a href="#" data-top>Back to top ↑</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/DrawSVGPlugin.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/MorphSVGPlugin.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js"></script>
+<script src="../assets/js/core.js?v=6"></script>
+<script src="../assets/js/project.js?v=6"></script>
+<script src="../assets/js/mixing.js?v=6"></script>
+</body>
+</html>
