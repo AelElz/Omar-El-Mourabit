@@ -16,6 +16,10 @@
 
   // the loader and pinned scenes assume the page starts at the top; hashes are handled after the intro
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  // take #hash links out of the browser's hands: its own jump fires at load, when pinned scenes
+  // may not be measured yet. We keep the hash here and scroll ourselves once the page is ready.
+  OEM.hash = location.hash && location.hash.length > 1 ? location.hash : '';
+  if (OEM.hash && history.replaceState) history.replaceState(null, '', location.pathname + location.search);
   window.scrollTo(0, 0);
 
   /* ---------- clock (works without GSAP) ---------- */
@@ -105,7 +109,7 @@
   // ScrollTrigger remembers the browser's restoration mode from before this script ran and
   // puts it back later; make "manual" its value too, or reloads land mid-page under the loader
   ScrollTrigger.clearScrollMemory('manual');
-  if (!location.hash) window.addEventListener('load', () => { if (window.scrollY > 0 && document.querySelector('.loader')) window.scrollTo(0, 0); });
+  if (!OEM.hash) window.addEventListener('load', () => { if (window.scrollY > 0 && document.querySelector('.loader')) window.scrollTo(0, 0); });
 
   // Anton drives every display line; split and fit those only once it has loaded
   OEM.fontsReady = (document.fonts && document.fonts.load)
@@ -128,10 +132,13 @@
     gsap.ticker.lagSmoothing(0);
   }
   OEM.lenis = lenis;
+  // Lenis clamps every scroll to its cached page height; pinned scenes change that height on each
+  // ScrollTrigger refresh, so re-measure Lenis then (and before any jump) or far targets fall short
+  if (lenis) ScrollTrigger.addEventListener('refresh', () => lenis.resize());
 
   OEM.scrollTo = function (target, opts) {
     const o = Object.assign({ duration: 1.5 }, opts || {});
-    if (lenis) { lenis.scrollTo(target, o); return; }
+    if (lenis) { lenis.resize(); lenis.scrollTo(target, o); return; }
     if (typeof target === 'number') window.scrollTo({ top: target, behavior: reduce || o.immediate ? 'auto' : 'smooth' });
     else if (target) target.scrollIntoView({ behavior: reduce || o.immediate ? 'auto' : 'smooth' });
   };
@@ -160,7 +167,7 @@
   menu.setAttribute('aria-label', 'Site');
   menu.innerHTML =
     '<div class="menu__backdrop"></div>' +
-    '<div class="menu__panel">' +
+    '<div class="menu__panel" data-lenis-prevent>' +
       '<p class="menu__label">Menu</p>' +
       '<ul class="menu__list">' +
         sections.map(([n, label, h]) => `<li><a href="${href(h)}"${isHome ? '' : ' data-transition'}><small>${n}</small>${label}<span class="arr" aria-hidden="true">→</span></a></li>`).join('') +
@@ -181,7 +188,8 @@
   const backdrop = menu.querySelector('.menu__backdrop');
   const menuItems = menu.querySelectorAll('.menu__list li, .menu__cases, .menu__foot');
   let open = false;
-  gsap.set(panel, { xPercent: 102 });
+  // GSAP owns the whole transform: x stays 0, only xPercent moves (a CSS translateX here would be read as px and leave the panel off-screen)
+  gsap.set(panel, { x: 0, xPercent: 102 });
   const menuTl = gsap.timeline({ paused: true })
     .to(backdrop, { opacity: 1, duration: 0.5, ease: 'power2.out' }, 0)
     .fromTo(menuItems, { y: 26, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.6, ease: 'power3.out', stagger: 0.045 }, 0.12);
@@ -194,7 +202,7 @@
     btn.setAttribute('aria-expanded', 'true');
     btn.setAttribute('aria-label', 'Close menu');
     lenis && lenis.stop();
-    gsap.to(panel, { xPercent: 0, duration: 0.75, ease: 'expo.out' });
+    gsap.to(panel, { x: 0, xPercent: 0, duration: 0.75, ease: 'expo.out', overwrite: true });
     menuTl.timeScale(1).play();
     setTimeout(() => { const f = menu.querySelector('a'); f && f.focus({ preventScroll: true }); }, 120);
   }
@@ -205,11 +213,24 @@
     btn.setAttribute('aria-expanded', 'false');
     btn.setAttribute('aria-label', 'Open menu');
     lenis && lenis.start();
-    gsap.to(panel, { xPercent: 102, duration: immediate ? 0 : 0.55, ease: 'expo.in' });
+    gsap.to(panel, { x: 0, xPercent: 102, duration: immediate ? 0 : 0.55, ease: 'expo.in', overwrite: true });
     menuTl.timeScale(1.8).reverse();
     gsap.delayedCall(immediate ? 0 : 0.56, () => { if (!open) menu.classList.remove('is-open'); });
   }
   OEM.closeMenu = closeMenu;
+
+  // on the home page, mark the section you are in
+  if (isHome) {
+    const links = Array.from(menu.querySelectorAll('.menu__list a'));
+    links.forEach((a) => {
+      const sec = document.querySelector(a.getAttribute('href'));
+      if (!sec) return;
+      ScrollTrigger.create({
+        trigger: sec, start: 'top 55%', end: 'bottom 55%',
+        onToggle: (self) => { if (self.isActive) { links.forEach((l) => l.removeAttribute('aria-current')); a.setAttribute('aria-current', 'true'); } else a.removeAttribute('aria-current'); },
+      });
+    });
+  }
   btn.addEventListener('click', () => (open ? closeMenu() : openMenu()));
   backdrop.addEventListener('click', () => closeMenu());
   document.addEventListener('keydown', (e) => {
@@ -257,6 +278,8 @@
     leaving = true;
     if (reduce) { location.href = url; return; }
     try { sessionStorage.setItem('oem-wipe', '1'); } catch (e) { /* private mode */ }
+    // if animation frames are throttled (battery saver, background tab), still go
+    setTimeout(() => { location.href = url; }, 1800);
     gsap.set(wipe, { visibility: 'visible' });
     gsap.set(wShape, { attr: { d: OEM.UNION_D } });
     gsap.timeline({ onComplete: () => { location.href = url; } })
@@ -420,9 +443,41 @@
 
   /* ---------- scroll to the hash after the intro ---------- */
   OEM.goToHash = function () {
-    if (!location.hash || location.hash.length < 2) return;
+    const hash = OEM.hash;
+    if (!hash) return;
     let el = null;
-    try { el = document.querySelector(location.hash); } catch (e) { return; }
-    if (el) setTimeout(() => OEM.scrollTo(el, { immediate: true, duration: 0 }), 60);
+    try { el = document.querySelector(hash); } catch (e) { return; }
+    if (!el) return;
+    if (history.replaceState) history.replaceState(null, '', location.pathname + location.search + hash);
+    // measure from the real scroll position (Lenis' own value can lag right after a load)
+    const go = () => {
+      const y = Math.round(el.getBoundingClientRect().top + window.scrollY);
+      if (lenis) { lenis.resize(); lenis.scrollTo(y, { immediate: true, force: true }); }
+      else window.scrollTo(0, y);
+    };
+    setTimeout(go, 60);
+    // Late layout work (fonts, images, pinned scenes re-measuring, a late native jump) can still
+    // move the page off the target. Stay anchored to it for a few seconds, until the visitor
+    // scrolls on their own.
+    let raf = 0;
+    const check = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (Math.abs(el.getBoundingClientRect().top) > 4 && window.scrollY < max - 2) go();
+    };
+    const nudge = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(check); };
+    // the page growing above the target (a pin getting longer once its font loads) fires no scroll event
+    const ro = 'ResizeObserver' in window ? new ResizeObserver(nudge) : null;
+    const stop = () => {
+      window.removeEventListener('scroll', nudge);
+      window.removeEventListener('load', nudge);
+      ScrollTrigger.removeEventListener('refresh', nudge);
+      if (ro) ro.disconnect();
+    };
+    ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach((t) => window.addEventListener(t, stop, { once: true, passive: true }));
+    window.addEventListener('scroll', nudge, { passive: true });
+    window.addEventListener('load', nudge);
+    ScrollTrigger.addEventListener('refresh', nudge);
+    if (ro) ro.observe(document.body);
+    setTimeout(stop, 8000);
   };
 })();

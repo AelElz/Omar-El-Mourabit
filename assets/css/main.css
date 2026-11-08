@@ -159,9 +159,8 @@ button { font: inherit; color: inherit; }
   position: absolute; top: 0; right: 0; bottom: 0; width: min(470px, 100%);
   background: var(--navy-deep); color: var(--paper);
   padding: calc(104px + env(safe-area-inset-top)) clamp(24px, 3vw, 40px) calc(28px + env(safe-area-inset-bottom));
-  display: flex; flex-direction: column; overflow-y: auto;
-  transform: translateX(102%);
-  box-shadow: -40px 0 80px rgba(0, 0, 0, .3);
+  display: flex; flex-direction: column; overflow-y: auto; overscroll-behavior: contain;
+  box-shadow: -40px 0 80px rgba(0, 0, 0, .3);   /* off-canvas position is set by core.js (GSAP owns the transform) */
 }
 .menu__label { font-size: 13px; color: var(--ink-soft); margin-bottom: 10px; }
 .menu__list { list-style: none; padding: 0; }
@@ -173,7 +172,8 @@ button { font: inherit; color: inherit; }
 }
 .menu__list small { font-family: var(--font-text); font-size: 12px; color: var(--ink-soft); width: 22px; letter-spacing: 0; }
 .menu__list .arr { margin-left: auto; font-size: 20px; opacity: 0; transform: translateX(-10px); transition: opacity .3s, transform .4s var(--ease-out); }
-.menu__list a:hover, .menu__list a:focus-visible { color: var(--sun); }
+.menu__list a:hover, .menu__list a:focus-visible, .menu__list a[aria-current] { color: var(--sun); }
+.menu__list a[aria-current] .arr { opacity: 1; transform: none; }
 .menu__list a:hover .arr, .menu__list a:focus-visible .arr { opacity: 1; transform: none; }
 .menu__cases { margin-top: 30px; }
 .menu__cases a {
